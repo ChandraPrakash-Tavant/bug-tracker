@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
  
 jobs:
-  unit-tests-backend:
+  unit-tests-backend:   # Job1
     runs-on: ubuntu-latest
     outputs:
       coverage: ${{steps.test-backend.outputs.report}}
@@ -46,7 +46,7 @@ jobs:
           path: bugtracker-backend/test-results.xml
           reporter: jest-junit
 
-  unit-tests-frontend:
+  unit-tests-frontend:   # Job2
     # needs: unit-tests-backend
     runs-on: ubuntu-latest
     outputs:
@@ -79,7 +79,7 @@ jobs:
             name: Frontend unit test Report
             path: bugtracker-frontend/test-results.xml
             reporter: jest-junit
-  create-coverage-comment:
+  create-coverage-comment: # Job3
     if: github.event_name =='pull_request'
     needs: [unit-tests-backend, unit-tests-frontend]
     runs-on: ubuntu-latest
@@ -104,3 +104,17 @@ jobs:
             ``` 
             ${{needs.unit-tests-frontend.outputs.coverage}}
             ```
+  api-tests:  #Job4 
+      needs: [unit-tests-backend, unit-tests-frontend]
+      runs-on: ubuntu-latest
+      steps:
+         - name: Checkout Repo
+           uses: actions/checkout@v4
+
+         - name: Launch Application
+           run: |
+            docker compose up -d --build
+            npx wait-port http://localhost:8080/api/health -t 30000
+            
+
+        
