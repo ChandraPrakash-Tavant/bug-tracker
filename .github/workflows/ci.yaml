@@ -104,7 +104,7 @@ jobs:
             ``` 
             ${{needs.unit-tests-frontend.outputs.coverage}}
             ```
-  api-tests:  #Job4 
+  api-e2e-tests:  #Job4 
       needs: [unit-tests-backend, unit-tests-frontend]
       runs-on: ubuntu-latest
       steps:
@@ -121,6 +121,9 @@ jobs:
            run: |
              npm ci
              npx playwright test
+
+
+        
          - name: Shut Down Application
            run: |
              docker compose down
@@ -132,7 +135,14 @@ jobs:
               name: api-test-results
               path: ./tests-api/test-results/
               retention-days: 3
-
+         - name: Run E2E test
+           working-directory: ./tests-e2e
+           env: 
+              CI: "1"
+           run: |
+              npm ci 
+              npx playwright install
+              npx playwright test
          - name: Upload API Test Playwright Report
            if: always()
            uses: actions/upload-artifact@v4
