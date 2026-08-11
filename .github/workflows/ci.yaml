@@ -122,7 +122,14 @@ jobs:
              npm ci
              npx playwright test
 
-
+         - name: Run E2E frontend Test
+           working-directory: ./tests-e2e
+           env: 
+              CI: "1"
+           run: |
+              npm ci 
+              npx playwright install
+              npx playwright test
         
          - name: Shut Down Application
            run: |
@@ -135,14 +142,7 @@ jobs:
               name: api-test-results
               path: ./tests-api/test-results/
               retention-days: 3
-         - name: Run E2E test
-           working-directory: ./tests-e2e
-           env: 
-              CI: "1"
-           run: |
-              npm ci 
-              npx playwright install
-              npx playwright test
+
          - name: Upload API Test Playwright Report
            if: always()
            uses: actions/upload-artifact@v4
@@ -150,6 +150,7 @@ jobs:
               name: api-test-playwright-report
               path: ./tests-api/playwright-report/
               retention-days: 3
+         
          - name: Publish API Test results
            uses: dorny/test-reporter@v1
            if: always()
